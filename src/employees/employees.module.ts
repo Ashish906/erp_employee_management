@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { EmployeesController } from './employees.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -15,6 +15,6 @@ import { AuthModule } from '../auth/auth.module';
     AuthModule
   ],
   controllers: [EmployeesController],
-  providers: [EmployeesService],
+  providers: [EmployeesService, Logger],
 })
 export class EmployeesModule {}

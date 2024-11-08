@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -15,11 +15,13 @@ export class EmployeesService {
     private readonly employeeModel: typeof EmployeeEntity,
     @InjectModel(UserEntity)
     private readonly userModel: typeof UserEntity,
-    private authService: AuthService
+    private authService: AuthService,
+    private readonly logger: Logger
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto) {
     const { supervisor_id } = createEmployeeDto;
+
     if(supervisor_id) {
       const supervisorInfo = await this.employeeModel.findOne({
         where: {
@@ -56,6 +58,7 @@ export class EmployeesService {
       await this.incrementLeftBoundary(newEmployee, 2, transaction);
       // This also increment supervisor right boundary
       await this.incrementRightBoundary(newEmployee, 2, transaction, { id: {[Op.ne] : newEmployee.id} });
+      this.logger.warn(`Employee created ===> Employee with id ${newEmployee.id} created`);
 
       return newEmployee;
     });
@@ -346,8 +349,8 @@ export class EmployeesService {
         name: employee.name,
         position_id: employee.position_id,
         position_name: employee.position?.name,
-        left_boundary: employee.left_boundary, // For test
-        right_boundary: employee.right_boundary, // For test
+        // left_boundary: employee.left_boundary, // For test
+        // right_boundary: employee.right_boundary, // For test
         children: []
       };
     }

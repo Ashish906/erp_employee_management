@@ -9,7 +9,7 @@ import { PositionsModule } from './positions/positions.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 
-const envPath = join(__dirname,'..', process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env').trim();
+const envPath = join(__dirname,'..', (process.env.NODE_ENV !== 'production' ? `.env.${process.env.NODE_ENV}` : '.env')).trim();
 
 @Module({
   imports: [
