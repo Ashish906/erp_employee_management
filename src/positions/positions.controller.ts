@@ -1,8 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
+import { AuthGuard } from '../auth/auth.guard';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { Role } from '../users/enum/role.enum';
 
+@Roles(Role.admin)
+@UseGuards(AuthGuard)
 @Controller('positions')
 export class PositionsController {
   constructor(private readonly positionsService: PositionsService) {}

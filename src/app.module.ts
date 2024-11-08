@@ -6,6 +6,8 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { join } from 'path';
 import { EmployeesModule } from './employees/employees.module';
 import { PositionsModule } from './positions/positions.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 const envPath = join(__dirname,'..', process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env').trim();
 
@@ -30,6 +32,8 @@ const envPath = join(__dirname,'..', process.env.NODE_ENV ? `.env.${process.env.
     }),
     EmployeesModule,
     PositionsModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

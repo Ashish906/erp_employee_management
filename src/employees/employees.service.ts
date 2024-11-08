@@ -4,12 +4,18 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import EmployeeEntity from './entities/employee.entity';
 import { Op, Transaction } from 'sequelize';
+import { AuthService } from '../auth/auth.service';
+import { Role } from '../users/enum/role.enum';
+import UserEntity from '../users/entities/user.entity';
 
 @Injectable()
 export class EmployeesService {
   constructor(
     @InjectModel(EmployeeEntity)
     private readonly employeeModel: typeof EmployeeEntity,
+    @InjectModel(UserEntity)
+    private readonly userModel: typeof UserEntity,
+    private authService: AuthService
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto) {
@@ -38,12 +44,18 @@ export class EmployeesService {
     }
 
     return await this.employeeModel.sequelize.transaction(async (transaction: Transaction) => {
-      const newEmployee = await this.employeeModel.create({ ...createEmployeeDto }, { transaction });
+      const newUser = await this.authService.register({
+        name: createEmployeeDto.name,
+        email: createEmployeeDto.email,
+        role: Role.employee,
+        password: '123456' // Now just hard coded password, we may have password reset functionality in future.
+      }, transaction);
+      const newEmployee = await this.employeeModel.create({ ...createEmployeeDto, user_id: newUser.id }, { transaction });
 
       // To adjust other employees boundaries as well as supervisor
       await this.incrementLeftBoundary(newEmployee, 2, transaction);
       // This also increment supervisor right boundary
-      await this.incrementRightBoundary(newEmployee, 2, transaction);
+      await this.incrementRightBoundary(newEmployee, 2, transaction, { id: {[Op.ne] : newEmployee.id} });
 
       return newEmployee;
     });
@@ -91,7 +103,7 @@ export class EmployeesService {
 
     const transaction = await this.employeeModel.sequelize.transaction();
     try {
-      if(employee.supervisor_id !== updateEmployeeDto.supervisor_id) {
+      if(updateEmployeeDto.hasOwnProperty('supervisor_id') && employee.supervisor_id !== updateEmployeeDto.supervisor_id) {
         const childIds = (await this.employeeModel.findAll({
           where: {
             left_boundary: {
@@ -105,7 +117,7 @@ export class EmployeesService {
           const difference = (1 + employee.right_boundary - employee.left_boundary) * -1;
           const extra = {
             id: {
-              [Op.notIn]: childIds
+              [Op.notIn]: [...childIds, employee.id]
             }
           }
           await this.incrementLeftBoundary(employee, difference, transaction, extra);
@@ -127,6 +139,11 @@ export class EmployeesService {
           newPosDiff = newSupervisor?.right_boundary - employee.left_boundary; // Since left boundary == supervisor right boundary
         } else {
           const maxRight = await this.employeeModel.findOne({
+            where: {
+              id: {
+                [Op.notIn]: [...childIds, employee.id]
+              }
+            },
             order: [
               ['right_boundary', 'desc']
             ],
@@ -155,15 +172,26 @@ export class EmployeesService {
         });
         (<any>updateEmployeeDto).left_boundary = employee.left_boundary + newPosDiff;
         (<any>updateEmployeeDto).right_boundary = employee.right_boundary + newPosDiff;
-        await employee.update(updateEmployeeDto, { transaction });
 
-        const leftRightDiff = 1 + employee.right_boundary - employee.left_boundary;
-        await this.incrementLeftBoundary(employee, leftRightDiff, transaction);
-        await this.incrementRightBoundary(employee, leftRightDiff, transaction);
+        employee.dataValues.left_boundary = updateEmployeeDto["left_boundary"];
+        employee.dataValues.right_boundary = updateEmployeeDto["right_boundary"];
 
-        return 'Employee updated successfully!';
+        const leftRightDiff = 1 + updateEmployeeDto["right_boundary"] - updateEmployeeDto["left_boundary"];
+        const extra = {
+          id: {
+            [Op.notIn]: [...childIds, employee.id]
+          }
+        }
+        await this.incrementLeftBoundary(employee, leftRightDiff, transaction, extra);
+        await this.incrementRightBoundary(employee, leftRightDiff, transaction, extra);
       }
+
+      await employee.update(updateEmployeeDto, { transaction });
+      await transaction.commit();
+
+      return 'Employee updated successfully!';
     } catch (err) {
+      await transaction.rollback();
       throw err;
     }
   }
@@ -177,7 +205,8 @@ export class EmployeesService {
     if(!employee) throw new NotFoundException(`Employee with id ${id} not found`);
 
     return await this.employeeModel.sequelize.transaction(async (transaction: Transaction) => {
-      await employee.destroy({ transaction });
+      await employee.destroy({ force: true, transaction });
+      await this.userModel.destroy({ where: { id: employee.user_id }, transaction, force: true });
 
       const difference = (1 + employee.right_boundary - employee.left_boundary) * -1;
       const childIds = (await this.employeeModel.findAll({
@@ -270,7 +299,7 @@ export class EmployeesService {
     });
     if(!employee) throw new NotFoundException(`Employee with id ${employee_id} not found`);
 
-    const childEmployees = await this.employeeModel.findAll({
+    let childEmployees = await this.employeeModel.findAll({
       include: [
         {
           association: 'position',
@@ -289,18 +318,30 @@ export class EmployeesService {
         ['left_boundary', 'asc']
       ]
     });
+    childEmployees = JSON.parse(JSON.stringify(childEmployees));
+
     const tree = [];
     const tracker = {};
+
     for (const employee of childEmployees) {
-      tracker[employee.id] = { ...employee, children: [] };
+      tracker[employee.id] = {
+        id: employee.id,
+        name: employee.name,
+        position_id: employee.position_id,
+        position_name: employee.position?.name,
+        left_boundary: employee.left_boundary, // For test
+        right_boundary: employee.right_boundary, // For test
+        children: []
+      };
     }
 
     for (const employee of childEmployees) {
       const trac = tracker[employee.id];
-      tree.push(trac);
 
-      if(trac.supervisor_id) {
-        tracker[trac.supervisor_id]?.children.push(trac);
+      if(employee.supervisor_id !== employee_id) {
+        tracker[employee.supervisor_id]?.children.push(trac);
+      } else {
+        tree.push(trac);
       }
     }
 

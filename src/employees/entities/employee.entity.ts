@@ -1,5 +1,6 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import PositionEntity from '../../positions/entities/position.entity';
+import UserEntity from '../../users/entities/user.entity';
 
 @Table({
   tableName: 'employees',
@@ -33,6 +34,13 @@ class EmployeeEntity extends Model {
 
   @Column({ type: DataType.INTEGER, allowNull: false })
   right_boundary: number;
+
+  @ForeignKey(() => UserEntity)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  user_id: number;
+
+  @BelongsTo(() => UserEntity, { foreignKey: 'user_id' })
+  user: UserEntity;
 
   @BelongsTo(() => PositionEntity, { foreignKey: 'position_id' })
   position: PositionEntity;

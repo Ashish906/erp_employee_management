@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import PositionEntity from './entities/position.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class PositionsService {
@@ -12,6 +13,15 @@ export class PositionsService {
   ) {}
 
   async create(createPositionDto: CreatePositionDto) {
+    const existingPos = await this.positionModel.findOne({
+      where: {
+        name: createPositionDto.name
+      }
+    });
+    if(existingPos) {
+      throw new BadRequestException('Position already exists');
+    }
+
     return await this.positionModel.create({ ...createPositionDto });
   }
 
@@ -42,6 +52,18 @@ export class PositionsService {
     });
     if (!positionInfo) {
       throw new NotFoundException(`Position with id ${id} not found`);
+    }
+
+    const existingPos = await this.positionModel.findOne({
+      where: {
+        id: {
+          [Op.ne]: id
+        },
+        name: updatePositionDto.name
+      }
+    });
+    if(existingPos) {
+      throw new BadRequestException('Position already exists');
     }
 
     await positionInfo.update(updatePositionDto);
