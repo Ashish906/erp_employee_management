@@ -27,7 +27,7 @@ const envPath = join(__dirname,'..', (process.env.NODE_ENV !== 'production' ? `.
       sync: {
         alter: true
       },
-      synchronize: true,
+      synchronize: process.env.NODE_ENV !== 'production',
       autoLoadModels: true,
     }),
     EmployeesModule,

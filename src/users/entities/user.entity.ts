@@ -26,7 +26,7 @@ class UserEntity extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   password: string;
 
-  @Column({ defaultValue: true })
+  @Column({ type: DataType.BOOLEAN, defaultValue: true })
   is_active?: boolean;
 
   @Column({ type: DataType.ENUM(...Object.values(Role)), allowNull: false })
