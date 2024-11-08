@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -17,9 +17,10 @@ export class EmployeesController {
     return this.employeesService.create(createEmployeeDto);
   }
 
+  // If requested user is employee then he can only access his children employees
   @Get()
-  findAll() {
-    return this.employeesService.findAll();
+  findAll(@Request() req) {
+    return this.employeesService.findAll(req.user);
   }
 
   @Roles(Role.admin)
@@ -28,6 +29,7 @@ export class EmployeesController {
     return this.employeesService.getOrganogram(employee_id);
   }
 
+  @Roles(Role.admin)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: string) {
     return this.employeesService.findOne(+id);

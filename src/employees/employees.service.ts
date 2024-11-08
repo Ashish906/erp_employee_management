@@ -47,7 +47,7 @@ export class EmployeesService {
       const newUser = await this.authService.register({
         name: createEmployeeDto.name,
         email: createEmployeeDto.email,
-        role: Role.employee,
+        role: Role.employee as any,
         password: '123456' // Now just hard coded password, we may have password reset functionality in future.
       }, transaction);
       const newEmployee = await this.employeeModel.create({ ...createEmployeeDto, user_id: newUser.id }, { transaction });
@@ -61,7 +61,23 @@ export class EmployeesService {
     });
   }
 
-  async findAll() {
+  async findAll(payload) {
+    const query = {};
+    // If requested user is employee then he can only access his children employees
+    if(payload.role === Role.employee) {
+      const employeeInfo = await this.employeeModel.findOne({
+        where: {
+          id: payload.employee_id
+        }
+      });
+      query["left_boundary"] = {
+        [Op.gt]: employeeInfo.left_boundary
+      }
+      query["right_boundary"] = {
+        [Op.lt]: employeeInfo.right_boundary
+      }
+    }
+
     return await this.employeeModel.findAll({
       attributes: ['id', 'name', 'position_id'],
       include: [
@@ -69,7 +85,8 @@ export class EmployeesService {
           association: 'position',
           attributes: ['id', 'name']
         }
-      ]
+      ],
+      where: query
     });
   }
 
