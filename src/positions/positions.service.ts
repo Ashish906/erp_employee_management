@@ -4,6 +4,7 @@ import { UpdatePositionDto } from './dto/update-position.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import PositionEntity from './entities/position.entity';
 import { Op } from 'sequelize';
+import { CommonQueryDto } from '../common/dto/common-query.dto';
 
 @Injectable()
 export class PositionsService {
@@ -25,9 +26,13 @@ export class PositionsService {
     return await this.positionModel.create({ ...createPositionDto });
   }
 
-  async findAll() {
+  async findAll(query: CommonQueryDto) {
+    const { page, size } = query;
+
     return await this.positionModel.findAll({
-      attributes: ['id', 'name']
+      attributes: ['id', 'name'],
+      limit: size,
+      offset: page && size ? (page - 1) * size : 0,
     });
   }
 

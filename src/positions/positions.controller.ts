@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '../users/enum/role.enum';
+import { CommonQueryDto } from '../common/dto/common-query.dto';
 
 @Roles(Role.admin)
 @UseGuards(AuthGuard)
@@ -18,8 +19,8 @@ export class PositionsController {
   }
 
   @Get()
-  findAll() {
-    return this.positionsService.findAll();
+  findAll(@Query() query: CommonQueryDto) {
+    return this.positionsService.findAll(query);
   }
 
   @Get(':id')

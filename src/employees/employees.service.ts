@@ -7,6 +7,7 @@ import { Op, Transaction } from 'sequelize';
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../users/enum/role.enum';
 import UserEntity from '../users/entities/user.entity';
+import { CommonQueryDto } from '../common/dto/common-query.dto';
 
 @Injectable()
 export class EmployeesService {
@@ -64,7 +65,7 @@ export class EmployeesService {
     });
   }
 
-  async findAll(payload) {
+  async findAll(searchParams: CommonQueryDto, payload) {
     const query = {};
     // If requested user is employee then he can only access his children employees
     if(payload.role === Role.employee) {
@@ -89,7 +90,9 @@ export class EmployeesService {
           attributes: ['id', 'name']
         }
       ],
-      where: query
+      where: query,
+      limit: searchParams.size,
+      offset: searchParams.page && searchParams.size ? (searchParams.page - 1) * searchParams.size : 0,
     });
   }
 

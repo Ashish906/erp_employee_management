@@ -1,10 +1,23 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '../users/enum/role.enum';
+import { CommonQueryDto } from '../common/dto/common-query.dto';
 
 @UseGuards(AuthGuard)
 @Controller('employees')
@@ -19,8 +32,8 @@ export class EmployeesController {
 
   // If requested user is employee then he can only access his children employees
   @Get()
-  findAll(@Request() req) {
-    return this.employeesService.findAll(req.user);
+  findAll(@Request() req, @Query() query: CommonQueryDto) {
+    return this.employeesService.findAll(query, req.user);
   }
 
   @Roles(Role.admin)

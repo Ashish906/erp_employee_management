@@ -17,6 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "pretest:e2e": "jest --clearCache && npm run build",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate:dev": "set NODE_ENV=development&&sequelize-cli db:migrate",
     "migrate:test": "set NODE_ENV=test&&sequelize-cli db:migrate",
