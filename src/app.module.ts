@@ -8,6 +8,8 @@ import { EmployeesModule } from './employees/employees.module';
 import { PositionsModule } from './positions/positions.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseInterceptor } from './response.interceptor';
 
 const envPath = join(__dirname,'..', (process.env.NODE_ENV !== 'production' ? `.env.${process.env.NODE_ENV}` : '.env')).trim();
 
@@ -36,6 +38,12 @@ const envPath = join(__dirname,'..', (process.env.NODE_ENV !== 'production' ? `.
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor
+    }
+  ],
 })
 export class AppModule {}
