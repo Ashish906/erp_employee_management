@@ -58,15 +58,12 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## Deployment process
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Create two branch named version0.0.1 and production. Version branch is just for keep code of a version.
+2. Create a docker file. I will go for dockerized deployment since it is best for app scalability and versioning.
+3. Create CI/CD pipeline using github actions.
+4. CI/CD would be like when we deploy our code in production branch then it CI/CD come into action and run some steps like check lint errors -> run all test cases -> If all test cases pass, then deploy the code in the server.
 
 ## License
 
