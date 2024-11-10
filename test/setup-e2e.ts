@@ -74,6 +74,12 @@ beforeAll(async () => {
 
   await clearDatabase();
   await seedDatabase();
+
+  const response: any = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send({ email: 'admin@test.com', password: '123456' });
+  const data = JSON.parse(response.text);
+  adminAccessToken = data.data?.access_token
 });
 
 afterAll(async () => {
