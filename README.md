@@ -1,36 +1,25 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## Environment Variable
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Create a .env file in the root directory making sure it has all env variable available from .env.development if you want to run the app in production mode.
 
 ## Installation
 
 ```bash
 $ npm install
 ```
+
+# Migration
+
+```bash
+$ npm run migrate:production
+```
+
+# Data seeding
+
+```bash
+$ npm run seed:prod-all
+```
+This command will create one admin and one employee, some position and some employee in DB. Before running this command, please make sure src/database/config.js has correct credentials.
 
 ## Running the app
 
@@ -42,8 +31,29 @@ $ npm run start
 $ npm run start:dev
 
 # production mode
+$ npm run build
 $ npm run start:prod
 ```
+
+## Login credentials
+```
+Admin: super.admin@gmail.com Password: 123456
+Employee: sse1@gmail.com Password: 123456
+```
+
+## Endpoints
+```
+    /employees (POST)
+    /employees (GET)
+    /employees/organogram/:employee_id (GET)
+    /employees/:id (GET)
+    /employees/:id (PATCH)
+    /employees/:id (DELETE)
+```
+
+## Technique
+
+[Mike Hillyer's awesome technique](https://mikehillyer.com/articles/managing-hierarchical-data-in-mysql/)
 
 ## Test
 
@@ -64,6 +74,12 @@ $ npm run test:cov
 2. Create a docker file. I will go for dockerized deployment since it is best for app scalability and versioning.
 3. Create CI/CD pipeline using github actions.
 4. CI/CD would be like when we deploy our code in production branch then it CI/CD come into action and run some steps like check lint errors -> run all test cases -> If all test cases pass, then deploy the code in the server.
+
+## Area of improvement
+
+I was trying to do e2e testing with database connection instead of mocking some functions
+or database operations. Also I tried to create only on app instance for all test files so that I can reduce test execution time.
+I tried setupFiles, setupFilesAfterEnv, globalSetup, globalTeardown options in jest configuration. But Still I am struggling to solve this case.
 
 ## License
 

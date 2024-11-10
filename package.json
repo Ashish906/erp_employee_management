@@ -24,7 +24,8 @@
     "migrate:production": "set NODE_ENV=production&&sequelize-cli db:migrate",
     "seed:dev": "set NODE_ENV=development&&sequelize-cli db:seed:all",
     "unseed:dev": "set NODE_ENV=development&&sequelize-cli db:seed:undo:all",
-    "seed:prod": "set NODE_ENV=production&&sequelize-cli db:seed --seed 20241108190448-master-user"
+    "seed:prod": "set NODE_ENV=production&&sequelize-cli db:seed --seed 20241108190448-master-user",
+    "seed:prod-all": "set NODE_ENV=production&&sequelize-cli db:seed:all"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
