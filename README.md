@@ -43,7 +43,7 @@ Employee: sse1@gmail.com Password: 123456
 
 ## Endpoints
 ```
- .  /auth/login(POST)
+    /auth/login (POST)
     /employees (POST)
     /employees (GET)
     /employees/organogram/:employee_id (GET)
