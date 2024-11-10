@@ -13,13 +13,14 @@ $ npm install
 ```bash
 $ npm run migrate:production
 ```
+Before running this command, please make sure src/database/config.js has correct credentials.
 
 # Data seeding
 
 ```bash
 $ npm run seed:prod-all
 ```
-This command will create one admin and one employee, some position and some employee in DB. Before running this command, please make sure src/database/config.js has correct credentials.
+This command will create one admin and one employee, some position and some employee in DB.
 
 ## Running the app
 
